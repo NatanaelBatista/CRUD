@@ -130,8 +130,9 @@ class UsuariosModel
 					(
 						'users',
 						array(
-							'user' => chk_array( $this->form_data, 'user'), 
-							'User_password' => chk_array( $this->form_data, 'user_password'),
+							'user_name' => chk_array( $this->form_data, 'user_name'), 
+							'user' => chk_array( $this->form_data, 'user'),
+							'user_password' => chk_array( $this->form_data, 'user_password'),
 						)
 					);
 
@@ -149,7 +150,7 @@ class UsuariosModel
 						$this->form_msg = '<div class="alert alert-success fade in">
 						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
 						Usuário cadastrado com sucesso!.</div>';
-						
+
 						// Termina
 						return $success = true;
 					}
@@ -233,9 +234,9 @@ class UsuariosModel
 					(
 						'users', 'user_id', $s_user_id, 
 						array(
-							'user' => chk_array( $this->form_data, 'user'), 
-							'User_password' => chk_array( $this->form_data, 'user_password'),
-							'User_name' => chk_array( $this->form_data, 'user_name'), 
+							'user_name' => chk_array( $this->form_data, 'user_name'), 
+							'user' => chk_array( $this->form_data, 'user'),
+							'user_password' => chk_array( $this->form_data, 'user_password'),
 						)
 					);
 					

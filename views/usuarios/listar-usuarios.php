@@ -37,7 +37,7 @@
       <td></td>
       <td></td>
       <td>
-        <a class="btn btn-success btn-xs" href="<?php echo HOME_URI; ?>/usuarios/inserir">Novo</a>
+        <a class="btn btn-success" href="<?php echo HOME_URI; ?>/usuarios/inserir">Novo</a>
       </td>
     </tr>
   </tbody>
