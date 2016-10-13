@@ -29,6 +29,15 @@ class UsuariosModel
 	public $form_msg;
 
 	/**
+	 * $form_error
+	 *
+	 * As mensagens de feedback para o usuário.
+	 *
+	 * @access public
+	 */	
+	public $form_error;
+
+	/**
 	 * $db
 	 *
 	 * O objeto da nossa conexão PDO
@@ -68,7 +77,7 @@ class UsuariosModel
 		$this->form_data = array();
 
 		// Verifica se algum dado foi enviado
-		if ( 'POST' == $_SERVER['REQUEST_METHOD'] && ! empty ( $_POST ) )
+		if ( $_SERVER['REQUEST_METHOD'] == 'POST' && ! empty ( $_POST ) )
 		{	
 			// Faz o loop dos dados do post
 			foreach ( $_POST as $key => $value )
@@ -76,19 +85,18 @@ class UsuariosModel
 				// Insere os dados enviados na propriedade $form_data
 				$this->form_data[$key] = $value;
 			}
+
+			// Valida os dados passados no formulário
+			$this->validation( $this->form_data );
 		}
 		else
 		{
-			// Termina se nada foi enviado
+			// Termina se o formulário não foi submetido
 			return;
 		}
 
-		// Verifica se a propriedade $form_data foi preenchida
-		if( empty( $this->form_data ) )
-		{
-			return;
-		}
-		else
+		// Verifica se a propriedade $form_data foi preenchidas e se foram validadas
+		if( $this->form_error == false )
 		{
 			// Verifica se o usuário existe
 			$db_check_user = $this->db->query
@@ -133,6 +141,8 @@ class UsuariosModel
 							'user_name' => chk_array( $this->form_data, 'user_name'), 
 							'user' => chk_array( $this->form_data, 'user'),
 							'user_password' => chk_array( $this->form_data, 'user_password'),
+							'user_permissions' => chk_array( $this->form_data, 'user_permissions'),
+							'user_active' => chk_array( $this->form_data, 'user_active'),
 						)
 					);
 
@@ -142,7 +152,6 @@ class UsuariosModel
 						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
 						Não foi possível cadastrar o usuário.</div>';
 						
-						// Termina
 						return;
 					}
 					else
@@ -151,7 +160,6 @@ class UsuariosModel
 						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
 						Usuário cadastrado com sucesso!.</div>';
 
-						// Termina
 						return $success = true;
 					}
 				}
@@ -351,5 +359,151 @@ class UsuariosModel
 			// Preenche a tabela com os dados do usuário
 			return $query->fetchAll();
 		}
+	}
+
+	/**
+	 * Valida os dados do formulário
+	 * 
+	 * @since 0.1
+	 * @access public
+	 * @return Array
+	 */
+	public function validation( $form_data )
+	{
+		$user_name = 		$form_data['user_name'];
+		$user = 			$form_data['user'];
+		$user_password = 	$form_data['user_password'];
+		$pwd = 				$form_data['pwd'];
+		$permissions = 		$form_data['user_permissions'];
+  		$active;
+
+  		if ( isset( $this->form_data['user_active'] ) )
+  		 {
+  		 	$active = $this->form_data['user_active'];
+  		 	$this->form_data['user_active'] = 'yes';
+  		 }
+  		 else
+  		 {
+  		 	$active = 'no';
+  		 	$this->form_data['user_active'] = $active;
+  		 }
+
+  		function inputs( $entrada )
+  		{
+  			$entrada = htmlentities( $entrada );
+  			$entrada = strip_tags( $entrada );
+  			$entrada = ltrim( $entrada );
+  		}
+
+  		// Validação do nome de usuário
+  		
+  		if ( strlen( $user_name ) <= 0 )
+  		{
+  			$this->form_msg = '<div class="alert alert-danger fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				Insira o nome do usuário</div>';
+
+			$this->form_error = true;
+
+			return;
+  		}
+
+  		inputs( $user_name );
+
+  		if ( !preg_match( "/^[a-zA-Z ]*$/",$user_name ) )
+  		{
+  			$this->form_msg = '<div class="alert alert-danger fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				O nome deve conter apenas letras</div>';
+
+			$this->form_error = true;
+
+			return;
+  		}
+
+  		// Validação do nome de login
+
+  		if ( strlen( $user ) <= 0 )
+  		{
+  			$this->form_msg = '<div class="alert alert-danger fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				Insira o login do usuário</div>';
+
+			$this->form_error = true;
+
+			return;
+  		}
+  		
+  		inputs( $user );
+
+  		if ( !preg_match( "/^[a-zA-Z ]*$/",$user ) )
+  		{
+  			$this->form_msg = '<div class="alert alert-danger fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				O login deve conter apenas letras</div>';
+
+			$this->form_error = true;
+
+			return;
+  		}
+
+  		if ( strlen( $user ) > 15 )
+  		{
+  			$this->form_msg = '<div class="alert alert-danger fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				O login deve conter até 15 caracteres</div>';
+  		}
+
+  		// Validação da senha
+
+  		if ( strlen( $user_password ) <= 0 )
+  		{
+  			$this->form_msg = '<div class="alert alert-danger fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				Insira a senha</div>';
+
+			$this->form_error = true;
+
+			return;
+  		}
+
+  		if ( strlen( $user ) > 15 )
+  		{
+  			$this->form_msg = '<div class="alert alert-danger fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				A senha deve conter até 15 caracteres</div>';
+  		}
+  		
+  		inputs( $user_password );
+
+  		// Validação confirmação da senha
+
+  		if ( strlen( $pwd ) <= 0 )
+  		{
+  			$this->form_msg = '<div class="alert alert-danger fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				Confirme a senha</div>';
+
+			$this->form_error = true;
+
+			return;
+  		}
+  		
+  		inputs( $pwd );
+
+  		if ( $pwd != $user_password )
+  		{
+  			$this->form_msg = '<div class="alert alert-danger fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				As senhas não conferem</div>';
+
+			$this->form_error = true;
+
+			return;
+  		}
+
+  		$this->form_error = false;
+
+		return;
 	}
 }

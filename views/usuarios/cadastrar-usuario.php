@@ -40,14 +40,14 @@
       </div>
       <div class="form-group col-md-4">
         <label for="sel1">Permissões</label>
-        <select class="form-control" id="permission" name="permission">
+        <select class="form-control" id="permission" name="user_permissions">
           <option value="admin">Administrador</option>
           <option value="user">Usuário</option>
         </select>
       </div>
       <div class="form-group col-md-12">
         <div class="checkbox">
-          <label><input type="checkbox" name="active" checked="checked">Ativo</label>
+          <label><input type="checkbox" name="user_active" checked="checked">Ativo</label>
         </div>
       </div>
 
