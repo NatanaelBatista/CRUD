@@ -87,7 +87,7 @@ class UsuariosModel
 			}
 
 			// Valida os dados passados no formulário
-			$this->validation( $this->form_data );
+			$this->validation( $this->form_data, false );
 		}
 		else
 		{
@@ -185,15 +185,18 @@ class UsuariosModel
 		// Configura os dados do formulário
 		$this->form_data = array();
 
-		// Verifica se algo foi postado
-		if ( 'POST' == $_SERVER['REQUEST_METHOD'] && ! empty ( $_POST ) )
-		{
+		// Verifica se algum dado foi enviado
+		if ( $_SERVER['REQUEST_METHOD'] == 'POST' && ! empty ( $_POST ) )
+		{	
 			// Faz o loop dos dados do post
-			foreach ( $_POST as $key => $value ) {
-			
-				// Configura os dados do post para a propriedade $form_data
+			foreach ( $_POST as $key => $value )
+			{
+				// Insere os dados enviados na propriedade $form_data
 				$this->form_data[$key] = $value;
 			}
+
+			// Valida os dados passados no formulário
+			$this->validation( $this->form_data, true );
 		}
 		else
 		{
@@ -201,12 +204,8 @@ class UsuariosModel
 			return;
 		}
 
-		// Verifica se a propriedade $form_data foi preenchida
-		if( empty( $this->form_data ) )
-		{
-			return;
-		}
-		else
+		// Verifica se a propriedade $form_data foi preenchidas e se foram validadas
+		if( $this->form_error == false )
 		{
 			// O ID de usuário que vamos pesquisar
 			$s_user_id = false;
@@ -244,7 +243,8 @@ class UsuariosModel
 						array(
 							'user_name' => chk_array( $this->form_data, 'user_name'), 
 							'user' => chk_array( $this->form_data, 'user'),
-							'user_password' => chk_array( $this->form_data, 'user_password'),
+							'user_permissions' => chk_array( $this->form_data, 'user_permissions'),
+							'user_active' => chk_array( $this->form_data, 'user_active'),
 						)
 					);
 					
@@ -269,6 +269,8 @@ class UsuariosModel
 				}
 			}
 		}
+
+		return;
 	}
 
 	/**
@@ -368,14 +370,20 @@ class UsuariosModel
 	 * @access public
 	 * @return Array
 	 */
-	public function validation( $form_data )
+	public function validation( $form_data, $password_disabled )
 	{
 		$user_name = 		$form_data['user_name'];
 		$user = 			$form_data['user'];
-		$user_password = 	$form_data['user_password'];
-		$pwd = 				$form_data['pwd'];
 		$permissions = 		$form_data['user_permissions'];
+		$user_password;
+		$pwd;
   		$active;
+
+  		if ( $password_disabled == false )
+  		{
+  			$user_password = $form_data['user_password'];
+			$pwd = $form_data['pwd'];
+  		}
 
   		if ( isset( $this->form_data['user_active'] ) )
   		 {
@@ -454,56 +462,59 @@ class UsuariosModel
 				O login deve conter até 15 caracteres</div>';
   		}
 
-  		// Validação da senha
-
-  		if ( strlen( $user_password ) <= 0 )
+  		if ( $password_disabled == false )
   		{
-  			$this->form_msg = '<div class="alert alert-danger fade in">
-				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-				Insira a senha</div>';
+	  		// Validação da senha
 
-			$this->form_error = true;
+	  		if ( strlen( $user_password ) <= 0 )
+	  		{
+	  			$this->form_msg = '<div class="alert alert-danger fade in">
+					<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+					Insira a senha</div>';
+
+				$this->form_error = true;
+
+				return;
+	  		}
+
+	  		if ( strlen( $user ) > 15 )
+	  		{
+	  			$this->form_msg = '<div class="alert alert-danger fade in">
+					<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+					A senha deve conter até 15 caracteres</div>';
+	  		}
+	  		
+	  		inputs( $user_password );
+
+	  		// Validação confirmação da senha
+
+	  		if ( strlen( $pwd ) <= 0 )
+	  		{
+	  			$this->form_msg = '<div class="alert alert-danger fade in">
+					<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+					Confirme a senha</div>';
+
+				$this->form_error = true;
+
+				return;
+	  		}
+	  		
+	  		inputs( $pwd );
+
+	  		if ( $pwd != $user_password )
+	  		{
+	  			$this->form_msg = '<div class="alert alert-danger fade in">
+					<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+					As senhas não conferem</div>';
+
+				$this->form_error = true;
+
+				return;
+	  		}
+
+	  		$this->form_error = false;
 
 			return;
   		}
-
-  		if ( strlen( $user ) > 15 )
-  		{
-  			$this->form_msg = '<div class="alert alert-danger fade in">
-				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-				A senha deve conter até 15 caracteres</div>';
-  		}
-  		
-  		inputs( $user_password );
-
-  		// Validação confirmação da senha
-
-  		if ( strlen( $pwd ) <= 0 )
-  		{
-  			$this->form_msg = '<div class="alert alert-danger fade in">
-				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-				Confirme a senha</div>';
-
-			$this->form_error = true;
-
-			return;
-  		}
-  		
-  		inputs( $pwd );
-
-  		if ( $pwd != $user_password )
-  		{
-  			$this->form_msg = '<div class="alert alert-danger fade in">
-				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-				As senhas não conferem</div>';
-
-			$this->form_error = true;
-
-			return;
-  		}
-
-  		$this->form_error = false;
-
-		return;
 	}
 }

@@ -22,7 +22,7 @@
 <form method="post">
 
       <!-- Formulário para edição -->
-      
+
       <div class="form-group col-md-6">
         <label for="name">Nome Completo</label>
         <input type="text" class="form-control" id="name" name="user_name" value="<?php echo htmlentities( chk_array( $model->form_data, 'user_name' ) ); ?>">
@@ -41,14 +41,14 @@
       </div>
       <div class="form-group col-md-4">
         <label for="sel1">Permissões</label>
-        <select class="form-control" id="permission" name="permission">
-          <option value="admin">Administrador</option>
-          <option value="user">Usuário</option>
+        <select class="form-control" id="permission" name="user_permissions">
+          <option value="admin" <?php echo chk_array( $model->form_data, 'user_permissions' ) == 'admin' ? 'selected="selected"' : ''; ?>>Administrador</option>
+          <option value="user" <?php echo chk_array( $model->form_data, 'user_permissions' ) == 'user' ? 'selected="selected"' : ''; ?>>Usuário</option>
         </select>
       </div>
       <div class="form-group col-md-12">
         <div class="checkbox">
-          <label><input type="checkbox" name="active" checked="checked">Ativo</label>
+          <label><input type="checkbox" name="user_active" <?php echo chk_array( $model->form_data, 'user_active' ) == 'yes' ? 'checked="checked"' : ''; ?>>Ativo</label>
         </div>
       </div>
 
